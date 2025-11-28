@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Low Stock Report - Inventory System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0"><i class="bi bi-exclamation-triangle"></i> Low Stock Items Report</h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <i class="bi bi-info-circle"></i> {{ count }} item(s) below stock threshold
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>SKU</th>
+                                <th>Current</th>
+                                <th>Threshold</th>
+                                <th>Category</th>
+                                <th>Supplier</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'inventory:item_detail' item.id %}">
+                                        {{ item.name }}
+                                    </a>
+                                </td>
+                                <td><code>{{ item.sku }}</code></td>
+                                <td>
+                                    <span class="badge bg-danger">{{ item.quantity }}</span>
+                                </td>
+                                <td>{{ item.threshold_level }}</td>
+                                <td>{{ item.category.title }}</td>
+                                <td>{{ item.supplier.name|default:"N/A" }}</td>
+                                <td>
+                                    <a href="{% url 'operations:transaction_create' %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-plus"></i> Stock In
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="bi bi-check-circle"></i> No low stock items!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
