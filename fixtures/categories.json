@@ -1,0 +1,10 @@
+[
+  {"model": "inventory.category", "pk": 1, "fields": {"title": "Electronics", "description": "Laptops, phones, tablets, and electronic accessories", "created_at": "2025-01-20T10:00:00Z", "updated_at": "2026-04-01T10:00:00Z"}},
+  {"model": "inventory.category", "pk": 2, "fields": {"title": "Office Supplies", "description": "Pens, paper, folders, staplers, and desk accessories", "created_at": "2025-01-20T10:05:00Z", "updated_at": "2026-04-01T10:00:00Z"}},
+  {"model": "inventory.category", "pk": 3, "fields": {"title": "Furniture", "description": "Office desks, chairs, cabinets, and shelving units", "created_at": "2025-01-20T10:10:00Z", "updated_at": "2026-04-01T10:00:00Z"}},
+  {"model": "inventory.category", "pk": 4, "fields": {"title": "Networking Equipment", "description": "Routers, switches, cables, and network accessories", "created_at": "2025-02-01T09:00:00Z", "updated_at": "2026-04-01T10:00:00Z"}},
+  {"model": "inventory.category", "pk": 5, "fields": {"title": "Cleaning Supplies", "description": "Cleaning agents, mops, buckets, and sanitary products", "created_at": "2025-02-15T08:00:00Z", "updated_at": "2026-04-01T10:00:00Z"}},
+  {"model": "inventory.category", "pk": 6, "fields": {"title": "Safety Equipment", "description": "Fire extinguishers, first aid kits, safety signs, and PPE", "created_at": "2025-03-01T10:00:00Z", "updated_at": "2026-04-01T10:00:00Z"}},
+  {"model": "inventory.category", "pk": 7, "fields": {"title": "Printing Supplies", "description": "Toner cartridges, ink, print paper, and printer parts", "created_at": "2025-03-15T10:00:00Z", "updated_at": "2026-04-01T10:00:00Z"}},
+  {"model": "inventory.category", "pk": 8, "fields": {"title": "Kitchen & Pantry", "description": "Cutlery, plates, microwaves, water dispensers", "created_at": "2025-04-01T10:00:00Z", "updated_at": "2026-04-01T10:00:00Z"}}
+]

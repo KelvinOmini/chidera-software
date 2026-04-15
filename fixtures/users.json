@@ -1,0 +1,97 @@
+[
+  {
+    "model": "accounts.customuser",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$xuCHMfuUwwVMR2FCIQBxb9$D8wnrvbTpOUOTKPppizqJNY6xokHQR0mvZdZyJIiPX0=",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "Chidera",
+      "last_name": "Okonkwo",
+      "email": "admin@inventorysystem.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2025-01-15T08:00:00Z",
+      "role": "admin",
+      "date_created": "2025-01-15T08:00:00Z",
+      "date_modified": "2026-04-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$xuCHMfuUwwVMR2FCIQBxb9$D8wnrvbTpOUOTKPppizqJNY6xokHQR0mvZdZyJIiPX0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "manager_ada",
+      "first_name": "Ada",
+      "last_name": "Nwosu",
+      "email": "ada.nwosu@inventorysystem.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-02-10T09:00:00Z",
+      "role": "manager",
+      "date_created": "2025-02-10T09:00:00Z",
+      "date_modified": "2026-03-20T14:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$xuCHMfuUwwVMR2FCIQBxb9$D8wnrvbTpOUOTKPppizqJNY6xokHQR0mvZdZyJIiPX0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "manager_emeka",
+      "first_name": "Emeka",
+      "last_name": "Ibe",
+      "email": "emeka.ibe@inventorysystem.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-03-01T10:00:00Z",
+      "role": "manager",
+      "date_created": "2025-03-01T10:00:00Z",
+      "date_modified": "2026-04-10T11:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$xuCHMfuUwwVMR2FCIQBxb9$D8wnrvbTpOUOTKPppizqJNY6xokHQR0mvZdZyJIiPX0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "staff_blessing",
+      "first_name": "Blessing",
+      "last_name": "Okafor",
+      "email": "blessing.okafor@inventorysystem.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-04-15T08:30:00Z",
+      "role": "staff",
+      "date_created": "2025-04-15T08:30:00Z",
+      "date_modified": "2026-04-01T09:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$salt$hash",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "staff_tunde",
+      "first_name": "Tunde",
+      "last_name": "Adeyemi",
+      "email": "tunde.adeyemi@inventorysystem.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2025-05-20T09:00:00Z",
+      "role": "staff",
+      "date_created": "2025-05-20T09:00:00Z",
+      "date_modified": "2026-03-28T15:00:00Z"
+    }
+  }
+]
