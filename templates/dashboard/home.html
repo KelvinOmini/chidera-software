@@ -199,7 +199,10 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
     // Stock Movement Chart
     const stockCtx = document.getElementById('stockMovementChart').getContext('2d');
@@ -209,7 +212,7 @@
             labels: ['Stock In', 'Stock Out', 'Adjustments'],
             datasets: [{
                 label: 'Quantity',
-                data: [{{ stock_movement.stock_in_total }}, {{ stock_movement.stock_out_total }}, {{ stock_movement.adjustments_count }}],
+                data: [{{ stock_movement.stock_in }}, {{ stock_movement.stock_out }}, {{ stock_movement.adjustments }}],
                 backgroundColor: ['#198754', '#dc3545', '#ffc107'],
             }]
         },

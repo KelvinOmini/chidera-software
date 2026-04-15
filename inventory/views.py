@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, Count, F
+from django.core.paginator import Paginator
+from django.conf import settings
 from accounts.decorators import manager_required
 from .models import Item, Category, Supplier
 from .forms import ItemForm, CategoryForm, SupplierForm, ItemFilterForm
@@ -11,7 +13,7 @@ from .forms import ItemForm, CategoryForm, SupplierForm, ItemFilterForm
 @login_required(login_url='accounts:login')
 @require_http_methods(["GET"])
 def item_list(request):
-    """Display list of inventory items with filtering."""
+    """Display list of inventory items with filtering and pagination."""
     items = Item.objects.select_related('category', 'supplier').all()
     
     # Search functionality
@@ -36,7 +38,7 @@ def item_list(request):
     # Filter by stock status
     stock_status = request.GET.get('stock_status', '')
     if stock_status == 'in_stock':
-        items = items.filter(quantity__gt=0)
+        items = items.filter(quantity__gt=F('threshold_level'))
     elif stock_status == 'low_stock':
         items = items.filter(quantity__lte=F('threshold_level'), quantity__gt=0)
     elif stock_status == 'out_of_stock':
@@ -44,10 +46,17 @@ def item_list(request):
     
     form = ItemFilterForm(request.GET)
     
+    # Pagination
+    paginator = Paginator(items, getattr(settings, 'ITEMS_PER_PAGE', 20))
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'items': items,
+        'items': page_obj,
         'form': form,
         'search_query': search_query,
+        'page_obj': page_obj,
+        'total_count': paginator.count,
     }
     return render(request, 'inventory/item_list.html', context)
 
@@ -57,7 +66,11 @@ def item_list(request):
 def item_detail(request, pk):
     """Display item details."""
     item = get_object_or_404(Item, pk=pk)
-    context = {'item': item}
+    recent_transactions = item.transactions.select_related('user').order_by('-timestamp')[:10]
+    context = {
+        'item': item,
+        'recent_transactions': recent_transactions,
+    }
     return render(request, 'inventory/item_detail.html', context)
 
 
@@ -113,9 +126,17 @@ def item_delete(request, pk):
 @login_required(login_url='accounts:login')
 @require_http_methods(["GET"])
 def category_list(request):
-    """Display list of categories."""
+    """Display list of categories with pagination."""
     categories = Category.objects.annotate(item_count=Count('items')).all()
-    context = {'categories': categories}
+    
+    paginator = Paginator(categories, getattr(settings, 'ITEMS_PER_PAGE', 20))
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'categories': page_obj,
+        'page_obj': page_obj,
+    }
     return render(request, 'inventory/category_list.html', context)
 
 
@@ -170,9 +191,17 @@ def category_delete(request, pk):
 @login_required(login_url='accounts:login')
 @require_http_methods(["GET"])
 def supplier_list(request):
-    """Display list of suppliers."""
+    """Display list of suppliers with pagination."""
     suppliers = Supplier.objects.annotate(item_count=Count('items')).all()
-    context = {'suppliers': suppliers}
+    
+    paginator = Paginator(suppliers, getattr(settings, 'ITEMS_PER_PAGE', 20))
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'suppliers': page_obj,
+        'page_obj': page_obj,
+    }
     return render(request, 'inventory/supplier_list.html', context)
 
 

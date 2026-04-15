@@ -4,7 +4,7 @@ from .models import CustomUser
 
 
 class CustomUserCreationForm(UserCreationForm):
-    """Form for creating new users."""
+    """Form for creating new users (admin use only)."""
     
     email = forms.EmailField(
         required=True,
@@ -32,7 +32,7 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomUserChangeForm(UserChangeForm):
-    """Form for updating user information."""
+    """Form for updating user information (admin use only). Includes role field."""
     
     role = forms.ChoiceField(
         choices=CustomUser.ROLE_CHOICES,
@@ -48,6 +48,23 @@ class CustomUserChangeForm(UserChangeForm):
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class ProfileForm(forms.ModelForm):
+    """
+    Form for users editing their own profile.
+    DELIBERATELY excludes 'role' and 'is_active' to prevent privilege escalation.
+    """
+    
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email', 'first_name', 'last_name')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 

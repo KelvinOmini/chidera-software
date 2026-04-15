@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db.models import Q
+from django.conf import settings
 from accounts.decorators import manager_required
 from inventory.models import Item
 from .models import StockTransaction
@@ -46,7 +48,7 @@ def transaction_create(request):
 @login_required(login_url='accounts:login')
 @require_http_methods(["GET"])
 def transaction_list(request):
-    """Display list of stock transactions."""
+    """Display list of stock transactions with pagination."""
     transactions = StockTransaction.objects.select_related('item', 'user').all()
     
     # Filter by item
@@ -76,13 +78,20 @@ def transaction_list(request):
             Q(notes__icontains=search_query)
         )
     
+    # Pagination
+    paginator = Paginator(transactions, getattr(settings, 'ITEMS_PER_PAGE', 20))
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'transactions': transactions,
-        'items': Item.objects.all(),
+        'transactions': page_obj,
+        'items': Item.objects.only('id', 'name', 'sku').all(),
         'transaction_types': StockTransaction.TRANSACTION_TYPE_CHOICES,
         'search_query': search_query,
         'item_filter': item_id,
         'type_filter': transaction_type,
+        'page_obj': page_obj,
+        'total_count': paginator.count,
     }
     return render(request, 'operations/transaction_list.html', context)
 
@@ -99,12 +108,18 @@ def transaction_detail(request, pk):
 @login_required(login_url='accounts:login')
 @require_http_methods(["GET"])
 def item_transactions(request, item_id):
-    """Display all transactions for a specific item."""
+    """Display all transactions for a specific item with pagination."""
     item = get_object_or_404(Item, pk=item_id)
     transactions = item.transactions.select_related('user').all()
     
+    # Pagination
+    paginator = Paginator(transactions, getattr(settings, 'ITEMS_PER_PAGE', 20))
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
         'item': item,
-        'transactions': transactions,
+        'transactions': page_obj,
+        'page_obj': page_obj,
     }
     return render(request, 'operations/item_transactions.html', context)

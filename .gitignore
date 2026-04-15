@@ -49,11 +49,13 @@ db.sqlite3-journal
 .env
 .env.local
 .env.*.local
+.env.docker
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
+coverage.xml
 
 # Logs
 logs/
@@ -62,3 +64,13 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Docker
+*.pid
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Generated files
+*.resolved

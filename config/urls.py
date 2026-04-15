@@ -11,6 +11,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     
+    # Versioned REST API
+    path('api/v1/', include('config.api_urls')),
+    
     # Local app URLs
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('inventory/', include('inventory.urls', namespace='inventory')),

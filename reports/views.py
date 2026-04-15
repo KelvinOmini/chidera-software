@@ -1,3 +1,5 @@
+import csv
+from io import StringIO
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -85,22 +87,33 @@ def export_transactions_csv(request):
 @manager_required
 @require_http_methods(["GET"])
 def export_inventory_csv(request):
-    """Export inventory to CSV."""
+    """Export inventory to CSV with proper escaping (prevents CSV injection)."""
     from inventory.models import Item
     
     items = Item.objects.select_related('category', 'supplier').all()
     
-    output = []
-    output.append('Name,SKU,Quantity,Category,Supplier,Threshold,Unit Price,Total Value,Status')
+    output = StringIO()
+    writer = csv.writer(output, quoting=csv.QUOTE_ALL)
     
+    # Write header
+    writer.writerow(['Name', 'SKU', 'Quantity', 'Category', 'Supplier',
+                     'Threshold', 'Unit Price', 'Total Value', 'Status'])
+    
+    # Write data with proper escaping
     for item in items:
-        output.append(
-            f'{item.name},{item.sku},{item.quantity},{item.category.title},'
-            f'{item.supplier.name if item.supplier else "N/A"},{item.threshold_level},'
-            f'{item.unit_price},{item.get_total_value()},{item.get_stock_status()}'
-        )
+        writer.writerow([
+            item.name,
+            item.sku,
+            item.quantity,
+            item.category.title,
+            item.supplier.name if item.supplier else 'N/A',
+            item.threshold_level,
+            str(item.unit_price),
+            str(item.get_total_value()),
+            item.get_stock_status(),
+        ])
     
-    csv_data = '\n'.join(output)
+    csv_data = output.getvalue()
     response = HttpResponse(csv_data, content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="inventory_report.csv"'
     return response

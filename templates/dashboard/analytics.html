@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Inventory System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-bar-chart-line"></i> Analytics
+        </h1>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card summary-card">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">Total Items</p>
+                <h3 class="mb-0">{{ summary.total_items }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card summary-card" style="border-left-color: #198754;">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">Total Quantity</p>
+                <h3 class="mb-0">{{ summary.total_quantity }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card summary-card" style="border-left-color: #ffc107;">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">Low Stock</p>
+                <h3 class="mb-0">{{ summary.low_stock_count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card summary-card" style="border-left-color: #dc3545;">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">Transactions</p>
+                <h3 class="mb-0">{{ summary.total_transactions }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Stock Movement (30 Days)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="stockMovementChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Category Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Timeline -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Activity Timeline (Last 7 Days)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Previous</th>
+                                <th>New</th>
+                                <th>User</th>
+                                <th>Time</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in activity_timeline %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-{% if tx.transaction_type == 'IN' %}success{% elif tx.transaction_type == 'OUT' %}danger{% else %}warning{% endif %}">
+                                        {{ tx.get_transaction_type_display }}
+                                    </span>
+                                </td>
+                                <td>{{ tx.item.name }}</td>
+                                <td>{{ tx.quantity_changed }}</td>
+                                <td>{{ tx.previous_quantity }}</td>
+                                <td>{{ tx.new_quantity }}</td>
+                                <td>{{ tx.user.username|default:"System" }}</td>
+                                <td>{{ tx.timestamp|date:"M d, H:i" }}</td>
+                                <td>{{ tx.notes|default:"-"|truncatewords:10 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-3">No activity in the last 7 days</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Stock Movement Chart
+    const stockCtx = document.getElementById('stockMovementChart').getContext('2d');
+    new Chart(stockCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Stock In', 'Stock Out', 'Adjustments'],
+            datasets: [{
+                label: 'Quantity',
+                data: [{{ stock_movement.stock_in }}, {{ stock_movement.stock_out }}, {{ stock_movement.adjustments }}],
+                backgroundColor: ['#198754', '#dc3545', '#ffc107'],
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // Category Distribution Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for cat in category_distribution %}'{{ cat.name }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for cat in category_distribution %}{{ cat.quantity }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [
+                    '#0d6efd', '#6f42c1', '#20c997', '#fd7e14', '#dc3545',
+                    '#198754', '#0dcaf0', '#ffc107', '#6c757d', '#e83e8c'
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+</script>
+{% endblock %}

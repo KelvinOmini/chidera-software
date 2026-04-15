@@ -1,4 +1,4 @@
-from django.db.models import Sum, Count, Q, F
+from django.db.models import Sum, Count, Q, F, ExpressionWrapper, DecimalField
 from django.utils import timezone
 from datetime import timedelta
 from inventory.models import Item, Category
@@ -8,19 +8,30 @@ from io import StringIO
 
 
 class ReportService:
-    """Service for generating reports."""
+    """Service for generating reports with optimized queries."""
     
     @staticmethod
     def get_inventory_summary():
-        """Get overall inventory summary."""
+        """Get overall inventory summary using database aggregation (no N+1)."""
         items = Item.objects.all()
+        
+        # Use database-level aggregation instead of Python iteration
+        aggregates = items.aggregate(
+            total_quantity=Sum('quantity'),
+            total_value=Sum(
+                ExpressionWrapper(
+                    F('quantity') * F('unit_price'),
+                    output_field=DecimalField(max_digits=14, decimal_places=2)
+                )
+            ),
+        )
         
         return {
             'total_items': items.count(),
-            'total_quantity': items.aggregate(Sum('quantity'))['quantity__sum'] or 0,
-            'low_stock_count': items.filter(quantity__lte=F('threshold_level')).count(),
+            'total_quantity': aggregates['total_quantity'] or 0,
+            'low_stock_count': items.filter(quantity__lte=F('threshold_level'), quantity__gt=0).count(),
             'out_of_stock_count': items.filter(quantity=0).count(),
-            'total_value': sum(item.get_total_value() for item in items),
+            'total_value': aggregates['total_value'] or 0,
             'categories_count': Category.objects.count(),
         }
     
@@ -53,25 +64,30 @@ class ReportService:
     
     @staticmethod
     def get_category_report():
-        """Get inventory report by category."""
+        """Get inventory report by category using optimized database queries."""
         categories = Category.objects.annotate(
             item_count=Count('items'),
             total_quantity=Sum('items__quantity'),
+            total_value=Sum(
+                ExpressionWrapper(
+                    F('items__quantity') * F('items__unit_price'),
+                    output_field=DecimalField(max_digits=14, decimal_places=2)
+                )
+            ),
+            low_stock_count=Count(
+                'items',
+                filter=Q(items__quantity__lte=F('items__threshold_level'))
+            ),
         ).all()
         
         report_data = []
         for category in categories:
-            items = category.items.all()
-            total_value = sum(item.get_total_value() for item in items)
-            
             report_data.append({
                 'category': category.title,
                 'item_count': category.item_count or 0,
                 'total_quantity': category.total_quantity or 0,
-                'total_value': total_value,
-                'low_stock_count': items.filter(
-                    quantity__lte=F('threshold_level')
-                ).count(),
+                'total_value': category.total_value or 0,
+                'low_stock_count': category.low_stock_count or 0,
             })
         
         return report_data
@@ -103,21 +119,25 @@ class ReportService:
     
     @staticmethod
     def export_to_csv(queryset, fields, filename='report.csv'):
-        """Export queryset to CSV."""
+        """Export queryset to CSV with proper escaping."""
         output = StringIO()
-        writer = csv.writer(output)
+        writer = csv.writer(output, quoting=csv.QUOTE_ALL)
         
         # Write header
         writer.writerow(fields)
         
-        # Write data
+        # Write data with proper escaping
         for obj in queryset:
             row = []
             for field in fields:
                 value = getattr(obj, field, '')
                 if hasattr(value, '__call__'):
                     value = value()
-                row.append(value)
+                # Sanitize values to prevent CSV injection
+                str_value = str(value) if value is not None else ''
+                if str_value.startswith(('=', '+', '-', '@', '\t', '\n')):
+                    str_value = f"'{str_value}"
+                row.append(str_value)
             writer.writerow(row)
         
         return output.getvalue()
