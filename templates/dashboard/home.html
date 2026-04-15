@@ -18,9 +18,9 @@
     </div>
     <div class="col-md-6 text-md-end">
         <div class="btn-group shadow-sm">
-            <button type="button" class="btn btn-outline-primary active">Today</button>
-            <button type="button" class="btn btn-outline-primary">7D</button>
-            <button type="button" class="btn btn-outline-primary">30D</button>
+            <a href="?range=1" class="btn btn-outline-primary {% if days == 1 %}active{% endif %}">Today</a>
+            <a href="?range=7" class="btn btn-outline-primary {% if days == 7 %}active{% endif %}">7D</a>
+            <a href="?range=30" class="btn btn-outline-primary {% if days == 30 %}active{% endif %}">30D</a>
         </div>
     </div>
 </div>
@@ -103,7 +103,7 @@
     <div class="col-xl-7 animate-fade-in delay-2">
         <div class="glass-card h-100">
             <div class="card-header d-flex justify-content-between align-items-center border-0 pb-0">
-                <h6 class="mb-0 fw-bold">Stock Movement (Last 30 Days)</h6>
+                <h6 class="mb-0 fw-bold">Stock Movement (Last {{ days }} Days)</h6>
                 <button class="btn btn-sm btn-light btn-glass border-0 text-secondary"><i class="bi bi-three-dots"></i></button>
             </div>
             <div class="card-body">

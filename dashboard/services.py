@@ -9,13 +9,13 @@ class DashboardService:
     """Service for dashboard data."""
     
     @staticmethod
-    def get_dashboard_data():
+    def get_dashboard_data(days=30):
         """Get all dashboard data."""
         return {
             'summary_cards': DashboardService.get_summary_cards(),
             'recent_transactions': DashboardService.get_recent_transactions(limit=10),
             'low_stock_items': DashboardService.get_low_stock_items(limit=5),
-            'stock_movement_data': DashboardService.get_stock_movement_chart_data(),
+            'stock_movement_data': DashboardService.get_stock_movement_chart_data(days=days),
             'category_distribution': DashboardService.get_category_distribution(),
         }
     

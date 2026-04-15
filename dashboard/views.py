@@ -8,9 +8,15 @@ from .services import DashboardService
 @require_http_methods(["GET"])
 def home(request):
     """Display dashboard home page."""
-    dashboard_data = DashboardService.get_dashboard_data()
+    try:
+        days = int(request.GET.get('range', 30))
+    except ValueError:
+        days = 30
+    
+    dashboard_data = DashboardService.get_dashboard_data(days=days)
     
     context = {
+        'days': days,
         'summary': dashboard_data['summary_cards'],
         'recent_transactions': dashboard_data['recent_transactions'],
         'low_stock_items': dashboard_data['low_stock_items'],
