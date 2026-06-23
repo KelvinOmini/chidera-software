@@ -1,123 +1,135 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ item.name }} - Inventory System{% endblock %}
+{% block title %}{{ item.name }} | SmartInventory Intelligence{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h3 mb-0">{{ item.name }}</h1>
-                <small class="text-muted">SKU: {{ item.sku }}</small>
-            </div>
-            <div>
-                {% if user.can_manage_inventory %}
-                <a href="{% url 'inventory:item_update' item.id %}" class="btn btn-warning">
-                    <i class="bi bi-pencil"></i> Edit
-                </a>
-                <a href="{% url 'inventory:item_list' %}" class="btn btn-secondary">Back</a>
-                {% else %}
-                <a href="{% url 'inventory:item_list' %}" class="btn btn-secondary">Back</a>
-                {% endif %}
-            </div>
+<div class="d-flex justify-content-between align-items-start mb-5 animate-up">
+    <div class="d-flex align-items-center gap-4">
+        <a href="{% url 'inventory:item_list' %}" class="btn btn-glass p-3 rounded-circle text-muted"
+            title="Back to Catalog">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+        <div>
+            <span class="text-primary small fw-bold text-uppercase ls-wide">{{ item.category.title }}</span>
+            <h1 class="display-6 mb-1">{{ item.name }}</h1>
+            <code class="text-muted">SKU: {{ item.sku }}</code>
         </div>
     </div>
+    {% if user.can_manage_inventory %}
+    <div class="d-flex gap-3">
+        <a href="{% url 'inventory:item_update' item.id %}" class="btn-premium py-2 px-4 shadow-lg">
+            <i class="bi bi-pencil me-2"></i> Update Specification
+        </a>
+    </div>
+    {% endif %}
 </div>
 
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Item Information</h5>
-            </div>
-            <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-4">Name:</dt>
-                    <dd class="col-sm-8">{{ item.name }}</dd>
-                    
-                    <dt class="col-sm-4">SKU:</dt>
-                    <dd class="col-sm-8"><code>{{ item.sku }}</code></dd>
-                    
-                    <dt class="col-sm-4">Category:</dt>
-                    <dd class="col-sm-8">
-                        <a href="{% url 'inventory:category_list' %}">{{ item.category.title }}</a>
-                    </dd>
-                    
-                    <dt class="col-sm-4">Supplier:</dt>
-                    <dd class="col-sm-8">
-                        {% if item.supplier %}
-                        <a href="{% url 'inventory:supplier_list' %}">{{ item.supplier.name }}</a>
-                        {% else %}
-                        <span class="text-muted">N/A</span>
-                        {% endif %}
-                    </dd>
-                    
-                    <dt class="col-sm-4">Unit Price:</dt>
-                    <dd class="col-sm-8">${{ item.unit_price }}</dd>
-                    
-                    <dt class="col-sm-4">Created:</dt>
-                    <dd class="col-sm-8">{{ item.created_at|date:"M d, Y H:i" }}</dd>
-                </dl>
-            </div>
-        </div>
-    </div>
+<div class="row g-4">
+    <!-- Essential Metrics -->
+    <div class="col-lg-4 animate-up delay-1">
+        <div class="glass-container h-100 p-4">
+            <h5 class="mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-activity text-primary"></i> Live Inventory Data
+            </h5>
 
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Stock Information</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">Current Quantity</label>
-                    <h2 class="mb-0">{{ item.quantity }}</h2>
+            <div class="mb-5">
+                <div class="text-muted small fw-bold text-uppercase ls-wide mb-2">Current Volume</div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <h2 class="display-4 mb-0">{{ item.quantity }}</h2>
+                    <span class="text-muted">Units available</span>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Status</label>
-                    <div>
-                        {% if item.quantity == 0 %}
-                        <span class="badge bg-danger fs-6">Out of Stock</span>
-                        {% elif item.is_low_stock %}
-                        <span class="badge bg-warning fs-6">Low Stock</span>
-                        {% else %}
-                        <span class="badge bg-success fs-6">In Stock</span>
-                        {% endif %}
+                <div class="mt-3">
+                    {% if item.quantity == 0 %}
+                    <div
+                        class="alert alert-danger bg-danger bg-opacity-5 border-0 rounded-4 d-flex align-items-center gap-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                        <div><strong>Critical Deficit:</strong> Zero stock available. Reorder immediately.</div>
+                    </div>
+                    {% elif item.is_low_stock %}
+                    <div
+                        class="alert alert-warning bg-warning bg-opacity-5 border-0 rounded-4 d-flex align-items-center gap-3">
+                        <i class="bi bi-exclamation-circle-fill fs-4"></i>
+                        <div><strong>Low Stock Warning:</strong> Reached threshold of {{ item.threshold_level }}.</div>
+                    </div>
+                    {% else %}
+                    <div
+                        class="alert alert-success bg-success bg-opacity-5 border-0 rounded-4 d-flex align-items-center gap-3">
+                        <i class="bi bi-check-circle-fill fs-4"></i>
+                        <div><strong>Health Status:</strong> Inventory levels are nominal.</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="p-3 bg-secondary bg-opacity-5 rounded-4">
+                        <div class="text-muted small mb-1">Unit Valuation</div>
+                        <div class="fw-bold fs-5 text-main">₦{{ item.unit_price|floatformat:2 }}</div>
                     </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Low Stock Threshold</label>
-                    <p class="mb-0">{{ item.threshold_level }} units</p>
+                <div class="col-6">
+                    <div class="p-3 bg-secondary bg-opacity-5 rounded-4">
+                        <div class="text-muted small mb-1">Net Portfolio Value</div>
+                        <div class="fw-bold fs-5 text-main">₦{{ item.get_total_value|floatformat:2 }}</div>
+                    </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Total Value</label>
-                    <p class="mb-0">${{ item.get_total_value }}</p>
-                </div>
-                
-                {% if user.can_manage_inventory %}
-                <a href="{% url 'operations:item_transactions' item.id %}" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-arrow-left-right"></i> View Transactions
-                </a>
-                {% endif %}
             </div>
-        </div>
-    </div>
-</div>
 
-{% if item.description %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Description</h5>
+            {% if user.can_manage_inventory %}
+            <div class="mt-4">
+                <a href="{% url 'operations:item_transactions' item.id %}"
+                    class="btn btn-glass w-100 py-3 rounded-4 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-arrow-left-right"></i> Transaction Ledger
+                </a>
             </div>
-            <div class="card-body">
-                {{ item.description }}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Details and Description -->
+    <div class="col-lg-8 animate-up delay-2">
+        <div class="row g-4 h-100">
+            <div class="col-12">
+                <div class="glass-container p-4">
+                    <h5 class="mb-4">Hardware Specifications</h5>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase ls-wide">Origin Supplier</div>
+                            <div class="mt-1 d-flex align-items-center gap-2">
+                                <i class="bi bi-truck text-secondary"></i>
+                                {% if item.supplier %}
+                                <a href="{% url 'inventory:supplier_list' %}" class="text-main fw-bold">{{ item.supplier.name }}</a>
+                                {% else %}
+                                <span class="text-muted">Direct Sourcing</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase ls-wide">Registration Date</div>
+                            <div class="mt-1 fw-bold text-main">
+                                <i class="bi bi-calendar3 me-2 text-secondary"></i> {{ item.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-muted small text-uppercase ls-wide">Safe Threshold</div>
+                            <div class="mt-1 fw-bold text-main">
+                                <i class="bi bi-shield-check me-2 text-secondary"></i> {{ item.threshold_level }} Units
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 flex-grow-1">
+                <div class="glass-container p-4 h-100">
+                    <h5 class="mb-4">Intelligence & Brief</h5>
+                    <div class="fs-5 text-main lh-lg">
+                        {{ item.description|default:"Technical description is currently unavailable for this specific SKU."|linebreaks }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-{% endif %}
 {% endblock %}

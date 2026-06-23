@@ -74,3 +74,4 @@ celerybeat.pid
 
 # Generated files
 *.resolved
+node_modules/

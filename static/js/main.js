@@ -1,71 +1,75 @@
 /**
- * Smart Inventory Management - Main JS
+ * Smart Inventory Management - Premium Interactive JS
+ * Handles theme switching, animations, and UI refinements
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Theme Toggling
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    // Check for saved theme preference or use the system preference
-    const currentTheme = localStorage.getItem('theme') || 
-                        (prefersDarkScheme.matches ? 'dark' : 'light');
-    
-    // Initial setup
-    if (currentTheme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        updateThemeIcon('dark');
-    }
-    
-    // Toggle on click
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', function() {
-            let theme = document.documentElement.getAttribute('data-theme');
-            let newTheme = theme === 'dark' ? 'light' : 'dark';
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-            
-            // Dispatch event for charts to update colors
-            window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: newTheme } }));
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. THEME MANAGEMENT ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // Recovery transition class
+    const addThemeTransition = () => {
+        htmlElement.classList.add('theme-transitioning');
+        setTimeout(() => htmlElement.classList.remove('theme-transitioning'), 400);
+    };
+
+    const setTheme = (theme) => {
+        addThemeTransition();
+        htmlElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        updateThemeIcon(theme);
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
+    };
+
+    const updateThemeIcon = (theme) => {
+        if (!themeToggle) return;
+        themeToggle.innerHTML = theme === 'dark'
+            ? '<i class="bi bi-moon-stars-fill"></i>'
+            : '<i class="bi bi-sun-fill"></i>';
+    };
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(savedTheme);
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
         });
     }
-    
-    function updateThemeIcon(theme) {
-        if (!themeToggleBtn) return;
-        if (theme === 'dark') {
-            themeToggleBtn.innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
-        } else {
-            themeToggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
+
+    // --- 2. BOOTSTRAP INITIALIZATION ---
+    // Initialize Toasts
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(el => new bootstrap.Toast(el, { autohide: true, delay: 5000 }).show());
+
+    // Initialize Tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(el => new bootstrap.Tooltip(el));
+
+    // --- 3. UI ENHANCEMENTS ---
+    // Smooth appearance for table rows
+    const tableRows = document.querySelectorAll('.table-glass tr');
+    tableRows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(10px)';
+        row.style.transition = `all 0.3s ease ${index * 0.05}s`;
+
+        setTimeout(() => {
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, 100);
+    });
+
+    // Active Link Highlighting refinement
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
         }
-    }
-    
-    // 2. Initialize Toasts
-    const toastElList = [].slice.call(document.querySelectorAll('.toast'))
-    const toastList = toastElList.map(function(toastEl) {
-        // Create Bootstrap toast with auto-hide
-        return new bootstrap.Toast(toastEl, { delay: 5000 });
     });
-    
-    // Show all toasts on load
-    toastList.forEach(toast => toast.show());
-    
-    // 3. Tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-    
-    // 4. Search Filter delay (debounce)
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        let timeout = null;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(timeout);
-            timeout = setTimeout(function() {
-                searchInput.closest('form').submit();
-            }, 500);
-        });
-    }
 });

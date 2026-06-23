@@ -1,151 +1,142 @@
 {% extends 'base.html' %}
 
-{% block title %}Items - Inventory System{% endblock %}
-
-{% block breadcrumbs %}
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}" class="text-decoration-none text-primary">Dashboard</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Items</li>
-    </ol>
-</nav>
-{% endblock %}
+{% block title %}Products | SmartInventory Catalog{% endblock %}
 
 {% block content %}
-<div class="row align-items-center mb-4">
-    <div class="col-md-6 mb-3 mb-md-0">
-        <h2 class="h3 mb-1 fw-bold">Items</h2>
-        <p class="text-secondary mb-0 small">Manage your entire product inventory.</p>
+<div class="d-flex justify-content-between align-items-end mb-5 animate-up">
+    <div>
+        <h1 class="display-6 mb-1">Products</h1>
+        <p class="text-muted mb-0">Complete catalog management and tracking.</p>
     </div>
     {% if user.can_manage_inventory %}
-    <div class="col-md-6 text-md-end">
-        <a href="{% url 'inventory:item_create' %}" class="btn btn-glass d-inline-flex align-items-center gap-2">
-            <i class="bi bi-plus-lg"></i> Add New Item
-        </a>
-    </div>
+    <a href="{% url 'inventory:item_create' %}" class="btn-premium py-2 px-4 shadow-lg">
+        <i class="bi bi-plus-lg me-2"></i> Register Product
+    </a>
     {% endif %}
 </div>
 
-<!-- Search and Filter -->
-<div class="glass-card mb-4 animate-fade-in delay-1 overflow-visible">
-    <div class="card-body p-4">
-        <form method="get" class="row g-3 align-items-end">
-            <div class="col-lg-4 col-md-6">
-                <label class="form-label text-secondary small fw-semibold">Search</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0 text-secondary">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" name="search" id="searchInput" class="form-control form-glass border-start-0 ps-0" placeholder="Name or SKU..." value="{{ search_query }}">
+<!-- Search & Filters -->
+<div class="glass-container mb-5 animate-up delay-1">
+    <div class="p-4">
+        <form method="get" class="row g-4 align-items-end">
+            <div class="col-lg-4 col-md-12">
+                <label class="form-label text-muted small fw-bold text-uppercase ls-wide mb-2">Search Catalog</label>
+                <div class="search-glass d-flex align-items-center gap-2 px-3">
+                    <i class="bi bi-search text-muted"></i>
+                    <input type="text" name="search" id="searchInput" class="bg-transparent border-0 w-100 outline-none"
+                        placeholder="Search by name, SKU or brand..." value="{{ search_query }}">
                 </div>
             </div>
+
             <div class="col-lg-3 col-md-6">
-                <label class="form-label text-secondary small fw-semibold">Category</label>
-                <select name="category" class="form-select form-glass">
-                    <option value="">All Categories</option>
-                    {% for category in default_categories|default:'' %}
-                    {# Wait, the view didn't explicitly pass categories, we'll rely on the existing form #}
-                    {% empty %}
-                    {% endfor %}
-                    <!-- We'll keep it simple for demonstration -->
-                    <option value="">All Categories</option>
+                <label class="form-label text-muted small fw-bold text-uppercase ls-wide mb-2">Stock Condition</label>
+                <select name="stock_status"
+                    class="form-select border-0 shadow-none bg-secondary bg-opacity-5 rounded-3">
+                    <option value="">All Inventory</option>
+                    <option value="in_stock" {% if request.GET.stock_status == 'in_stock' %}selected{% endif %}>In Stock
+                    </option>
+                    <option value="low_stock" {% if request.GET.stock_status == 'low_stock' %}selected{% endif %}>Critical
+                        Level</option>
+                    <option value="out_of_stock" {% if request.GET.stock_status == 'out_of_stock' %}selected{% endif %}>
+                        Depleted</option>
                 </select>
             </div>
+
             <div class="col-lg-3 col-md-6">
-                <label class="form-label text-secondary small fw-semibold">Stock Status</label>
-                <select name="stock_status" class="form-select form-glass">
-                    <option value="">All Statuses</option>
-                    <option value="in_stock" {% if request.GET.stock_status == 'in_stock' %}selected{% endif %}>In Stock</option>
-                    <option value="low_stock" {% if request.GET.stock_status == 'low_stock' %}selected{% endif %}>Low Stock</option>
-                    <option value="out_of_stock" {% if request.GET.stock_status == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
-                </select>
+                <label class="form-label text-muted small fw-bold text-uppercase ls-wide mb-2">Refine By</label>
+                <div class="dropdown">
+                    <button
+                        class="btn w-100 text-start bg-secondary bg-opacity-5 border-0 d-flex justify-content-between align-items-center"
+                        type="button" data-bs-toggle="dropdown">
+                        Categories <i class="bi bi-chevron-down small"></i>
+                    </button>
+                    <ul class="dropdown-menu glass-container border-0 shadow-lg w-100 p-2">
+                        <li><a class="dropdown-item rounded" href="?">Reset Category</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="col-lg-2 col-md-6">
-                <button type="submit" class="btn btn-outline-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
-                    <i class="bi bi-funnel"></i> Filter
+
+            <div class="col-lg-2">
+                <button type="submit"
+                    class="btn btn-primary w-100 py-2 rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-sliders"></i> Apply
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Items Table -->
-<div class="glass-card animate-fade-in delay-2">
+<!-- Product Table -->
+<div class="glass-container animate-up delay-2 overflow-hidden">
     <div class="table-responsive">
-        <table class="table-glass align-middle mb-0">
+        <table class="table-glass">
             <thead>
                 <tr>
-                    <th scope="col" style="width: 30%;">Product Details</th>
-                    <th scope="col" style="width: 15%;">SKU</th>
-                    <th scope="col" style="width: 15%;">Category</th>
-                    <th scope="col" style="width: 15%;">Stock Status</th>
-                    <th scope="col" style="width: 15%;">Price</th>
-                    <th scope="col" class="text-end" style="width: 10%;">Actions</th>
+                    <th style="width: 35%;">Product</th>
+                    <th>SKU Identifier</th>
+                    <th>Classification</th>
+                    <th>Inventory Status</th>
+                    <th>Valuation</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in items %}
-                <tr>
+                <tr class="hover-bg-light transition-all">
                     <td>
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-primary bg-opacity-10 text-primary rounded d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
-                                <i class="bi bi-box fs-5"></i>
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center"
+                                style="width: 38px; height: 38px;">
+                                <i class="bi bi-box"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0 fw-bold">{{ item.name }}</h6>
-                                <small class="text-secondary d-block text-truncate" style="max-width: 200px;" title="{{ item.description }}">{{ item.description|default:"No description" }}</small>
+                                <div class="fw-bold">{{ item.name }}</div>
+                                <div class="text-muted small text-truncate" style="max-width: 250px;">{{ item.description|default:"No description available" }}</div>
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <code class="text-primary bg-primary bg-opacity-10 px-2 py-1 rounded">{{ item.sku }}</code>
+                    <td><code class="small text-main bg-secondary bg-opacity-10 px-2 py-1 rounded">{{ item.sku }}</code>
                     </td>
+                    <td><span class="text-muted">{{ item.category.title }}</span></td>
                     <td>
-                        <span class="badge-soft badge-soft-primary">{{ item.category.title }}</span>
-                    </td>
-                    <td>
-                        <div class="d-flex flex-column">
-                            <h6 class="mb-1 fw-bold">{{ item.quantity }} <span class="fs-6 fw-normal text-secondary">units</span></h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold">{{ item.quantity }}</span>
                             {% if item.quantity == 0 %}
-                            <span class="badge-soft badge-soft-danger d-inline-block text-center" style="max-width: 90px;"><i class="bi bi-x-circle me-1"></i>Out</span>
+                            <span class="badge-premium danger-bg text-danger">Depleted</span>
                             {% elif item.is_low_stock %}
-                            <span class="badge-soft badge-soft-warning d-inline-block text-center" style="max-width: 90px;"><i class="bi bi-exclamation-triangle me-1"></i>Low</span>
+                            <span class="badge-premium warning-bg text-warning">Low Level</span>
                             {% else %}
-                            <span class="badge-soft badge-soft-success d-inline-block text-center" style="max-width: 90px;"><i class="bi bi-check-circle me-1"></i>Optimal</span>
+                            <span class="badge-premium success-bg text-success">Healthy</span>
                             {% endif %}
                         </div>
                     </td>
-                    <td>
-                        <span class="fw-bold">₦{{ item.unit_price|floatformat:2 }}</span>
-                    </td>
+                    <td><span class="fw-bold">₦{{ item.unit_price|floatformat:0 }}</span></td>
                     <td class="text-end">
-                        <div class="btn-group shadow-sm">
-                            <a href="{% url 'inventory:item_detail' item.id %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="View Details">
-                                <i class="bi bi-eye"></i>
-                            </a>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'inventory:item_detail' item.id %}"
+                                class="btn btn-sm btn-glass p-2 rounded-circle" title="View Detail"><i
+                                    class="bi bi-eye"></i></a>
                             {% if user.can_manage_inventory %}
-                            <a href="{% url 'inventory:item_update' item.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit Item">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            <a href="{% url 'inventory:item_update' item.id %}"
+                                class="btn btn-sm btn-glass p-2 rounded-circle text-primary" title="Modify Record"><i
+                                    class="bi bi-pencil"></i></a>
                             {% endif %}
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6">
-                        <div class="text-center py-5">
-                            <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 80px; height: 80px;">
-                                <i class="bi bi-inbox fs-1"></i>
-                            </div>
-                            <h5 class="fw-bold">No Items Found</h5>
-                            <p class="text-secondary mb-4">We couldn't find any items matching your search criteria.</p>
-                            {% if user.can_manage_inventory %}
-                            <a href="{% url 'inventory:item_create' %}" class="btn btn-glass">
-                                <i class="bi bi-plus-lg me-2"></i>Add Your First Item
-                            </a>
-                            {% endif %}
+                    <td colspan="6" class="text-center py-5">
+                        <div class="mx-auto mb-4 bg-secondary bg-opacity-5 rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 80px; height: 80px;">
+                            <i class="bi bi-search text-muted fs-2"></i>
                         </div>
+                        <h5 class="fw-bold">No results found</h5>
+                        <p class="text-muted small">Adjust your search parameters or register a new product.</p>
+                        {% if user.can_manage_inventory %}
+                        <a href="{% url 'inventory:item_create' %}" class="btn btn-primary mt-3 px-4 rounded-pill">New
+                            Product</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -153,28 +144,26 @@
         </table>
     </div>
 
-    <!-- Pagination -->
     {% if is_paginated %}
-    <div class="card-footer bg-transparent border-top border-secondary border-opacity-10 py-3">
-        <nav aria-label="Item pagination">
-            <ul class="pagination justify-content-center mb-0">
+    <div class="p-4 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
+        <div class="text-muted small">Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+        <nav>
+            <ul class="pagination pagination-sm mb-0 gap-1">
                 {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if request.GET.stock_status %}&stock_status={{ request.GET.stock_status }}{% endif %}"><i class="bi bi-chevron-double-left"></i></a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if request.GET.stock_status %}&stock_status={{ request.GET.stock_status }}{% endif %}"><i class="bi bi-chevron-left"></i></a>
+                    <a class="page-link rounded-circle border-0 bg-secondary bg-opacity-10"
+                        href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"><i
+                            class="bi bi-chevron-left"></i></a>
                 </li>
                 {% endif %}
-
-                <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-
+                <li class="page-item active">
+                    <span class="page-link rounded-circle border-0 shadow-sm">{{ page_obj.number }}</span>
+                </li>
                 {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if request.GET.stock_status %}&stock_status={{ request.GET.stock_status }}{% endif %}"><i class="bi bi-chevron-right"></i></a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if request.GET.stock_status %}&stock_status={{ request.GET.stock_status }}{% endif %}"><i class="bi bi-chevron-double-right"></i></a>
+                    <a class="page-link rounded-circle border-0 bg-secondary bg-opacity-10"
+                        href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"><i
+                            class="bi bi-chevron-right"></i></a>
                 </li>
                 {% endif %}
             </ul>

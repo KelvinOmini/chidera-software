@@ -1,65 +1,70 @@
 {% extends 'base.html' %}
 
-{% block title %}Categories - Inventory System{% endblock %}
+{% block title %}Categories | SmartInventory Architecture{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0"><i class="bi bi-tags"></i> Categories</h1>
-            {% if user.can_manage_inventory %}
-            <a href="{% url 'inventory:category_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Add Category
-            </a>
-            {% endif %}
-        </div>
+<div class="d-flex justify-content-between align-items-end mb-5 animate-up">
+    <div>
+        <h1 class="display-6 mb-1">Categories</h1>
+        <p class="text-muted mb-0">Organize and classify your inventory assets.</p>
     </div>
+    {% if user.can_manage_inventory %}
+    <a href="{% url 'inventory:category_create' %}" class="btn-premium py-2 px-4 shadow-lg">
+        <i class="bi bi-plus-lg me-2"></i> Define Category
+    </a>
+    {% endif %}
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Items</th>
-                                <th>Description</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for category in categories %}
-                            <tr>
-                                <td><strong>{{ category.title }}</strong></td>
-                                <td><span class="badge bg-info">{{ category.item_count }}</span></td>
-                                <td>{{ category.description|truncatewords:10 }}</td>
-                                <td>
-                                    {% if user.can_manage_inventory %}
-                                    <a href="{% url 'inventory:category_update' category.id %}" class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form method="post" action="{% url 'inventory:category_delete' category.id %}" style="display:inline;" onsubmit="return confirm('Are you sure?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-4">No categories found</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+<div class="glass-container animate-up delay-1 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table-glass">
+            <thead>
+                <tr>
+                    <th style="width: 40%;">Classification</th>
+                    <th>Product Count</th>
+                    <th style="width: 30%;">Brief</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr class="hover-bg-light transition-all">
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 d-flex align-items-center justify-content-center"
+                                style="width: 38px; height: 38px;">
+                                <i class="bi bi-tag"></i>
+                            </div>
+                            <div class="fw-bold fs-5 text-main">{{ category.title }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge-premium bg-secondary bg-opacity-10 text-main fw-bold">{{ category.item_count }} Items</span>
+                    </td>
+                    <td class="text-muted small">{{ category.description|default:"No description provided."|truncatewords:15 }}</td>
+                    <td class="text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            {% if user.can_manage_inventory %}
+                            <a href="{% url 'inventory:category_update' category.id %}"
+                                class="btn btn-sm btn-glass p-2 rounded-circle text-primary" title="Edit Category"><i
+                                    class="bi bi-pencil"></i></a>
+                            <form method="post" action="{% url 'inventory:category_delete' category.id %}"
+                                onsubmit="return confirm('Archive this category? Products will lose this classification.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-glass p-2 rounded-circle text-danger"
+                                    title="Delete Category"><i class="bi bi-trash"></i></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5 text-muted">No classifications defined yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

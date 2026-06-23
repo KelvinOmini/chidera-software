@@ -1,67 +1,80 @@
 {% extends 'base.html' %}
 
-{% block title %}Suppliers - Inventory System{% endblock %}
+{% block title %}Suppliers | SmartInventory Network{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0"><i class="bi bi-truck"></i> Suppliers</h1>
-            {% if user.can_manage_inventory %}
-            <a href="{% url 'inventory:supplier_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Add Supplier
-            </a>
-            {% endif %}
-        </div>
+<div class="d-flex justify-content-between align-items-end mb-5 animate-up">
+    <div>
+        <h1 class="display-6 mb-1">Supplier Network</h1>
+        <p class="text-muted mb-0">Management of supply chain partners and fulfillment sources.</p>
     </div>
+    {% if user.can_manage_inventory %}
+    <a href="{% url 'inventory:supplier_create' %}" class="btn-premium py-2 px-4 shadow-lg">
+        <i class="bi bi-plus-lg me-2"></i> Onboard Supplier
+    </a>
+    {% endif %}
 </div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Items</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for supplier in suppliers %}
-                            <tr>
-                                <td><strong>{{ supplier.name }}</strong></td>
-                                <td>{{ supplier.email|default:"N/A" }}</td>
-                                <td>{{ supplier.phone|default:"N/A" }}</td>
-                                <td><span class="badge bg-info">{{ supplier.item_count }}</span></td>
-                                <td>
-                                    {% if user.can_manage_inventory %}
-                                    <a href="{% url 'inventory:supplier_update' supplier.id %}" class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form method="post" action="{% url 'inventory:supplier_delete' supplier.id %}" style="display:inline;" onsubmit="return confirm('Are you sure?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No suppliers found</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+<div class="glass-container animate-up delay-1 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table-glass">
+            <thead>
+                <tr>
+                    <th style="width: 35%;">Organization</th>
+                    <th>Communication Channel</th>
+                    <th>Portfolio Depth</th>
+                    <th class="text-end">Lifecycle Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supplier in suppliers %}
+                <tr class="hover-bg-light transition-all">
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 d-flex align-items-center justify-content-center"
+                                style="width: 38px; height: 38px;">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <div class="fw-bold text-main fs-5">{{ supplier.name }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-column gap-1">
+                            <div class="small text-muted d-flex align-items-center gap-2">
+                                <i class="bi bi-envelope-at opacity-50"></i> {{ supplier.email|default:"No digital record" }}
+                            </div>
+                            <div class="small text-muted d-flex align-items-center gap-2">
+                                <i class="bi bi-telephone opacity-50"></i> {{ supplier.phone|default:"Voice records missing" }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge-premium bg-secondary bg-opacity-10 text-main fw-bold">{{ supplier.item_count }} Active SKUs</span>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            {% if user.can_manage_inventory %}
+                            <a href="{% url 'inventory:supplier_update' supplier.id %}"
+                                class="btn btn-sm btn-glass p-2 rounded-circle text-primary" title="Edit Partner"><i
+                                    class="bi bi-pencil"></i></a>
+                            <form method="post" action="{% url 'inventory:supplier_delete' supplier.id %}"
+                                onsubmit="return confirm('Decommission this supplier? Impact on SKU sourcing will be immediate.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-glass p-2 rounded-circle text-danger"
+                                    title="Remove Partner"><i class="bi bi-trash"></i></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5 text-muted">Zero supply partners registered in the system.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

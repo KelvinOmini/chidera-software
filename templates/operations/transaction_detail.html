@@ -1,56 +1,98 @@
 {% extends 'base.html' %}
 
-{% block title %}Transaction - Inventory System{% endblock %}
+{% block title %}Transaction Verification | SmartInventory Ledger{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0">Transaction Details</h1>
-            <a href="{% url 'operations:transaction_list' %}" class="btn btn-secondary">Back</a>
+<div class="d-flex justify-content-between align-items-center mb-5 animate-up">
+    <div class="d-flex align-items-center gap-4">
+        <a href="{% url 'operations:transaction_list' %}" class="btn btn-glass p-3 rounded-circle text-muted"
+            title="Back to Ledger">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+        <div>
+            <h1 class="display-6 mb-1">Transaction Audit</h1>
+            <p class="text-muted mb-0">Detailed cryptographic record of stock movement.</p>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-3">Date & Time:</dt>
-                    <dd class="col-sm-9">{{ transaction.timestamp|date:"M d, Y H:i:s" }}</dd>
-                    
-                    <dt class="col-sm-3">Item:</dt>
-                    <dd class="col-sm-9">
-                        <a href="{% url 'inventory:item_detail' transaction.item.id %}">
+<div class="row g-4">
+    <div class="col-lg-8 animate-up delay-1">
+        <div class="glass-container p-4">
+            <h5 class="mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-journal-text text-primary"></i> Core Transaction Data
+            </h5>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="text-muted small text-uppercase ls-wide mb-1">Temporal Timestamp</div>
+                    <div class="fw-bold fs-5 text-main">{{ transaction.timestamp|date:"M d, Y" }} at {{ transaction.timestamp|date:"H:i:s" }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-muted small text-uppercase ls-wide mb-1">Authorized Resource</div>
+                    <div class="mt-1">
+                        <a href="{% url 'inventory:item_detail' transaction.item.id %}"
+                            class="fw-bold text-primary fs-5">
                             {{ transaction.item.name }}
                         </a>
-                    </dd>
-                    
-                    <dt class="col-sm-3">Type:</dt>
-                    <dd class="col-sm-9">
-                        <span class="badge bg-{% if transaction.transaction_type == 'IN' %}success{% elif transaction.transaction_type == 'OUT' %}danger{% else %}warning{% endif %} fs-6">
+                        <div class="smaller text-muted">SKU: {{ transaction.item.sku }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-muted small text-uppercase ls-wide mb-1">Movement Classification</div>
+                    <div class="mt-2 text-start">
+                        <span
+                            class="badge-premium bg-{% if transaction.transaction_type == 'IN' %}success-bg text-success{% elif transaction.transaction_type == 'OUT' %}danger-bg text-danger{% else %}warning-bg text-warning{% endif %} d-inline-block">
                             {{ transaction.get_transaction_type_display }}
                         </span>
-                    </dd>
-                    
-                    <dt class="col-sm-3">Quantity Changed:</dt>
-                    <dd class="col-sm-9">{{ transaction.quantity_changed }}</dd>
-                    
-                    <dt class="col-sm-3">Previous Quantity:</dt>
-                    <dd class="col-sm-9">{{ transaction.previous_quantity }}</dd>
-                    
-                    <dt class="col-sm-3">New Quantity:</dt>
-                    <dd class="col-sm-9">{{ transaction.new_quantity }}</dd>
-                    
-                    <dt class="col-sm-3">User:</dt>
-                    <dd class="col-sm-9">{{ transaction.user.get_full_name|default:transaction.user.username }}</dd>
-                    
-                    {% if transaction.notes %}
-                    <dt class="col-sm-3">Notes:</dt>
-                    <dd class="col-sm-9">{{ transaction.notes }}</dd>
-                    {% endif %}
-                </dl>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-muted small text-uppercase ls-wide mb-1">Volume Variance</div>
+                    <div class="fw-bold fs-4 text-main">
+                        {% if transaction.transaction_type == 'IN' %}+{% elif transaction.transaction_type == 'OUT' %}-{% endif %}{{ transaction.quantity_changed }} Units
+                    </div>
+                </div>
+            </div>
+
+            {% if transaction.notes %}
+            <div class="mt-5 p-4 bg-secondary bg-opacity-5 rounded-4 border-start border-primary border-4">
+                <div class="text-muted small text-uppercase ls-wide mb-2">Audit Notes</div>
+                <div class="text-main italic font-serif">"{{ transaction.notes }}"</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-4 animate-up delay-2">
+        <div class="glass-container p-4 h-100">
+            <h5 class="mb-4">Balance Evolution</h5>
+            <div class="d-flex flex-column gap-4">
+                <div class="p-3 bg-secondary bg-opacity-10 rounded-4">
+                    <div class="text-muted small mb-1">Opening Balance</div>
+                    <div class="fw-bold fs-3 text-main">{{ transaction.previous_quantity }}</div>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <i class="bi bi-chevron-double-down fs-3 text-primary opacity-50"></i>
+                </div>
+                <div class="p-3 bg-primary bg-opacity-10 border border-primary border-opacity-10 rounded-4">
+                    <div class="text-muted small mb-1">Closing Balance</div>
+                    <div class="fw-bold fs-3 text-primary">{{ transaction.new_quantity }}</div>
+                </div>
+
+                <div class="mt-4 pt-4 border-top border-secondary border-opacity-10">
+                    <div class="text-muted small text-uppercase ls-wide mb-2">Executor Identity</div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-secondary bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-main">{{ transaction.user.get_full_name|default:transaction.user.username }}</div>
+                            <div class="smaller text-muted">@{{ transaction.user.username }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
