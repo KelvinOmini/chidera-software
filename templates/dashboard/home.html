@@ -210,7 +210,7 @@
     };
 
     const getThemeColors = () => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const isDark = document.documentElement.getAttribute('data-theme')  == = 'dark';
         return {
             text: isDark ? '#94a3b8' : '#64748b',
             grid: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
@@ -225,7 +225,7 @@
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: type === 'doughnut',
+                display: type  == = 'doughnut',
                 position: 'bottom',
                 labels: { color: colors.text, font: { family: 'Plus Jakarta Sans', size: 12 }, usePointStyle: true, padding: 20 }
             },
@@ -237,7 +237,7 @@
                 cornerRadius: 12
             }
         },
-        scales: type === 'bar' ? {
+        scales: type  == = 'bar' ? {
             y: { grid: { color: colors.grid, drawBorder: false }, ticks: { color: colors.text }},
             x: { grid: { display: false }, ticks: { color: colors.text }}
         } : {}

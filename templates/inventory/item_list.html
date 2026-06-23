@@ -47,7 +47,7 @@
                 <select name="category" class="form-select border-0 shadow-none bg-secondary bg-opacity-5 rounded-3">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if request.GET.category==cat.id|slugify %}selected{% endif %}>{{
+                    <option value="{{ cat.id }}" {% if request.GET.category == cat.id|slugify %}selected{% endif %}>{{
                         cat.title }}</option>
                     {% endfor %}
                 </select>
