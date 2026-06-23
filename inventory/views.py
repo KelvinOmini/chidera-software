@@ -57,6 +57,9 @@ def item_list(request):
         'search_query': search_query,
         'page_obj': page_obj,
         'total_count': paginator.count,
+        'categories': Category.objects.all(),
+        'suppliers': Supplier.objects.all(),
+        'type_filter': stock_status,
     }
     return render(request, 'inventory/item_list.html', context)
 
