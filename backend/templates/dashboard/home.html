@@ -238,17 +238,17 @@
             }
         },
         scales: type === 'bar' ? {
-            y: { grid: { color: colors.grid, drawBorder: false }, ticks: { color: colors.text } },
-            x: { grid: { display: false }, ticks: { color: colors.text } }
+            y: { grid: { color: colors.grid, drawBorder: false }, ticks: { color: colors.text }},
+            x: { grid: { display: false }, ticks: { color: colors.text }}
         } : {}
     });
 
     // Data from Django
-    const stockInData = {{ stock_movement.stock_in|default: 0 }};
-    const stockOutData = {{ stock_movement.stock_out|default: 0 }};
-    const adjustmentsData = {{ stock_movement.adjustments|default: 0 }};
+    const stockInData = {{ stock_movement.stock_in|default:0 }};
+    const stockOutData = {{ stock_movement.stock_out|default:0 }};
+    const adjustmentsData = {{ stock_movement.adjustments|default:0 }};
     const categoryLabels = [{% for cat in category_distribution %}"{{ cat.name }}"{% if not forloop.last %}, {% endif %} {% endfor %}];
-    const categoryData = [{% for cat in category_distribution %}{ { cat.quantity } } {% if not forloop.last %}, {% endif %} {% endfor %}];
+    const categoryData = [{% for cat in category_distribution %}{{ cat.quantity }} {% if not forloop.last %}, {% endif %} {% endfor %}];
 
     // Stock Movement Chart
     const moveChart = new Chart(document.getElementById('stockMovementChart'), {

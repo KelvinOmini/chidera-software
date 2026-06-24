@@ -20,8 +20,7 @@ urlpatterns = [
     path('inventory/', include('inventory.urls', namespace='inventory')),
     path('operations/', include('operations.urls', namespace='operations')),
     path('reports/', include('reports.urls', namespace='reports')),
-    path('dashboard/', include('dashboard.urls', namespace='dashboard')),
-    path('', include('dashboard.urls')),  # Home page
+    path('', include('dashboard.urls', namespace='dashboard')),
 ]
 
 # Serve media files in development
