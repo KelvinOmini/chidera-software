@@ -12,6 +12,7 @@
         <div>
             <span class="text-primary small fw-bold text-uppercase ls-wide">{{ item.category.title }}</span>
             <h1 class="display-6 mb-1">{{ item.name }}</h1>
+            <div id="collaboration-indicator" class="d-none animate-up" style="margin-top: 0.5rem;"></div>
             <code class="text-muted">SKU: {{ item.sku }}</code>
         </div>
     </div>
@@ -99,7 +100,8 @@
                             <div class="mt-1 d-flex align-items-center gap-2">
                                 <i class="bi bi-truck text-secondary"></i>
                                 {% if item.supplier %}
-                                <a href="{% url 'inventory:supplier_list' %}" class="text-main fw-bold">{{ item.supplier.name }}</a>
+                                <a href="{% url 'inventory:supplier_list' %}" class="text-main fw-bold">{{
+                                    item.supplier.name }}</a>
                                 {% else %}
                                 <span class="text-muted">Direct Sourcing</span>
                                 {% endif %}
@@ -125,11 +127,51 @@
                 <div class="glass-container p-4 h-100">
                     <h5 class="mb-4">Intelligence & Brief</h5>
                     <div class="fs-5 text-main lh-lg">
-                        {{ item.description|default:"Technical description is currently unavailable for this specific SKU."|linebreaks }}
+                        {{ item.description|default:"Technical description is currently unavailable for this specific
+                        SKU."|linebreaks }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const socket = new WebSocket(protocol + window.location.host + '/ws/inventory/');
+        
+        socket.onopen = function() {
+            // Signal presence on this item
+            socket.send(JSON.stringify({
+                'type': 'user_activity',
+                'user': '{{ user.username }}',
+                'action': 'viewing',
+                'item_id': {{ item.id }}
+            }));
+        };
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'collaboration' && data.item_id == {{ item.id }} && data.user !== '{{ user.username }}') {
+                showCollaborationIndicator(data.user, data.action);
+            }
+        };
+
+        function showCollaborationIndicator(user, action) {
+            const indicator = document.getElementById('collaboration-indicator');
+            indicator.innerHTML = `<div class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-2 rounded-pill d-flex align-items-center gap-2">
+                <span class="pulse rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
+                <span>${user} is ${action} this item</span>
+            </div>`;
+            indicator.classList.remove('d-none');
+            
+            // Fade out after 30 seconds
+            setTimeout(() => {
+                indicator.classList.add('d-none');
+            }, 30000);
+        }
+    });
+</script>
 {% endblock %}

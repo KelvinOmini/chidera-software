@@ -41,6 +41,8 @@ class StockTransaction(models.Model):
         related_name='stock_transactions'
     )
     notes = models.TextField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True, help_text='IP address of the user performing the transaction')
+    user_agent = models.TextField(null=True, blank=True, help_text='Browser user agent for security tracking')
     timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:

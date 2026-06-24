@@ -26,14 +26,17 @@ def transaction_create(request):
                 quantity = form.cleaned_data['quantity_changed']
                 notes = form.cleaned_data.get('notes', '')
                 
+                ip_address = request.META.get('REMOTE_ADDR')
+                user_agent = request.META.get('HTTP_USER_AGENT')
+                
                 if transaction_type == 'IN':
-                    StockOperationService.stock_in(item, quantity, request.user, notes)
+                    StockOperationService.stock_in(item, quantity, request.user, notes, ip_address, user_agent)
                     messages.success(request, f'Stock in: {quantity} units added to {item.name}')
                 elif transaction_type == 'OUT':
-                    StockOperationService.stock_out(item, quantity, request.user, notes)
+                    StockOperationService.stock_out(item, quantity, request.user, notes, ip_address, user_agent)
                     messages.success(request, f'Stock out: {quantity} units removed from {item.name}')
                 elif transaction_type == 'ADJUSTMENT':
-                    StockOperationService.adjust_stock(item, quantity, request.user, notes)
+                    StockOperationService.adjust_stock(item, quantity, request.user, notes, ip_address, user_agent)
                     messages.success(request, f'Stock adjusted: {item.name} quantity set to {quantity}')
                 
                 return redirect('operations:transaction_list')

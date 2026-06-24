@@ -97,11 +97,24 @@ python manage.py runserver
 
 Access the application at: `http://localhost:8000`
 
-### 3. Default Login Credentials
+### 3. Default Login Credentials (Testing)
 
-After creating a superuser, use those credentials to login.
+The system comes with the following pre-configured test accounts for verifying different authorization levels:
 
-### 4. Initial Data Setup
+| Role | Username | Password | Access Level |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin` | `admin123` | Full access (System & Users) |
+| **Manager** | `manager` | `manager123` | Inventory Manage & Reports |
+| **Staff** | `staff` | `staff123` | View Inventory & Basic Ops |
+
+To login, navigate to `http://localhost:8000/accounts/login/`.
+
+### 4. Custom Superuser
+If you need a custom admin account, you can create one using:
+```bash
+cd backend
+python manage.py createsuperuser
+```
 
 #### Create Sample Data (Optional)
 

@@ -43,10 +43,21 @@ class Supplier(models.Model):
         return self.name
 
 
+from django_resized import ResizedImageField
+
 class Item(models.Model):
     """Inventory item model."""
     
     name = models.CharField(max_length=200)
+    image = ResizedImageField(
+        size=[500, 500], 
+        quality=75, 
+        upload_to='products/', 
+        force_format='WEBP',
+        blank=True, 
+        null=True,
+        help_text='Optimized product image (max 500x500, WEBP)'
+    )
     description = models.TextField(blank=True, null=True)
     sku = models.CharField(
         max_length=50,
@@ -111,3 +122,22 @@ class Item(models.Model):
     def get_total_value(self):
         """Calculate total inventory value for this item."""
         return self.quantity * self.unit_price
+
+    def get_estimated_days_left(self):
+        """Basic forecasting based on recent transaction frequency (last 30 days)."""
+        from operations.models import StockTransaction
+        from django.db.models import Sum
+        from datetime import timedelta
+        
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        total_out = StockTransaction.objects.filter(
+            item=self,
+            transaction_type='OUT',
+            timestamp__gte=thirty_days_ago
+        ).aggregate(total=Sum('quantity_changed'))['total'] or 0
+        
+        if total_out == 0:
+            return None
+            
+        daily_rate = total_out / 30
+        return int(self.quantity / daily_rate)
