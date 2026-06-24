@@ -1,0 +1,155 @@
+/* Design System Tokens - HSL Based */
+:root {
+    /* Light Theme (Default) */
+    --primary-h: 220;
+    --primary-s: 90%;
+    --primary-l: 50%;
+    
+    --bg-h: 0;
+    --bg-s: 0%;
+    --bg-l: 100%;
+    
+    --surface-h: 210;
+    --surface-s: 20%;
+    --surface-l: 98%;
+    
+    --text-h: 220;
+    --text-s: 20%;
+    --text-l: 10%;
+    
+    --text-muted-h: 220;
+    --text-muted-s: 10%;
+    --text-muted-l: 45%;
+    
+    --border-h: 220;
+    --border-s: 15%;
+    --border-l: 90%;
+    
+    --accent-h: 160;
+    --accent-s: 80%;
+    --accent-l: 40%;
+    
+    /* CSS Variables */
+    --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+    --primary-hover: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - 10%));
+    --bg: hsl(var(--bg-h), var(--bg-s), var(--bg-l));
+    --surface: hsl(var(--surface-h), var(--surface-s), var(--surface-l));
+    --text: hsl(var(--text-h), var(--text-s), var(--text-l));
+    --text-muted: hsl(var(--text-muted-h), var(--text-muted-s), var(--text-muted-l));
+    --border: hsl(var(--border-h), var(--border-s), var(--border-l));
+    --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+    
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-blur: 12px;
+}
+
+[data-theme='dark'] {
+    --bg-h: 220;
+    --bg-s: 20%;
+    --bg-l: 8%;
+    
+    --surface-h: 220;
+    --surface-s: 15%;
+    --surface-l: 12%;
+    
+    --text-h: 220;
+    --text-s: 10%;
+    --text-l: 95%;
+    
+    --text-muted-h: 220;
+    --text-muted-s: 10%;
+    --text-muted-l: 65%;
+    
+    --border-h: 220;
+    --border-s: 15%;
+    --border-l: 25%;
+    
+    --glass-bg: rgba(20, 25, 35, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Global Styles */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.card, .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--primary-h), 50%, 50%, 0.3);
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Theme Toggle Component */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 34px;
+    position: relative;
+    width: 60px;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    background-color: #fff;
+    bottom: 4px;
+    content: "";
+    height: 26px;
+    left: 4px;
+    position: absolute;
+    transition: .4s;
+    width: 26px;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     
     # Third-party apps
     'rest_framework',
@@ -32,6 +33,10 @@ INSTALLED_APPS = [
     'django_filters',
     'crispy_forms',
     'crispy_bootstrap5',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     
     # Local apps
     'accounts.apps.AccountsConfig',
@@ -66,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request', # Required by allauth
             ],
         },
     },
@@ -136,6 +142,36 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'dashboard:home'
 LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# Authentication settings
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SITE_ID = 1
+
+# Allauth Configuration
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none' # For simplicity in this demo, usually 'mandatary'
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
 
 # Session settings
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
