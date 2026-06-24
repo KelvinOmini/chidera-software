@@ -1,253 +1,70 @@
-# Smart Inventory Management System
+# Smart Inventory Management System (Advanced)
 
-A comprehensive web-based inventory management system built with Django, featuring real-time tracking, role-based access control, and advanced reporting capabilities.
+A premium, enterprise-grade inventory management system built with Django and modern design principles. This platform features real-time tracking, advanced authentication (including Google OAuth), and a high-performance architecture.
 
-## Features
+## 🚀 Recent Upgrades
+- **Architectural Clarity**: Clean separation of `backend`, `frontend`, `docs`, and `scripts`.
+*   **Design System**: Luxury HSL-based design system with full **Dark Mode** support and Glassmorphic UI.
+- **Advanced Auth**: Integrated **Google OAuth** via Allauth.
+- **Professional Docs**: High-quality UML and Activity diagrams included in the `docs/` folder.
 
-### Core Functionality
-- **User Authentication & Authorization**: Secure login with role-based access control (Admin, Manager, Staff)
-- **Inventory Management**: Add, update, delete, and view inventory items with detailed tracking
-- **Stock Operations**: Real-time stock-in/out operations with automatic transaction logging
-- **Smart Alerts**: Low-stock threshold alerts and predictive restocking suggestions
-- **Reporting**: Comprehensive reports with filtering, date range selection, and CSV export
-- **Dashboard**: Interactive dashboard with charts, summary cards, and recent activity tracking
+## 📁 Project Structure
+The project is organized for scalability and clarity:
 
-### Technical Features
-- PostgreSQL database for scalability
-- Role-based permissions system
-- CSRF protection and input validation
-- Responsive Bootstrap UI
-- RESTful API endpoints
-- Comprehensive test coverage
+*   **[`backend/`](backend/)**: Core Django application, REST API, and data models.
+*   **[`frontend/`](frontend/)**: Modern frontend assets and future head-less development space.
+*   **[`docs/`](docs/)**: Documentation, including professional study diagrams.
+*   **[`scripts/`](scripts/)**: Maintenance, data migration, and automation tools.
 
-## System Requirements
+## 🖼️ Professional Diagrams
+Standardized diagrams for the study are located in `docs/diagrams/`:
+- **TAM Model**: Figure 2.1 (Technology Acceptance Model)
+- **Systems Theory**: Figure 2.2
+- **Architecture**: Figure 3.1 (Three-Tier Architecture)
+- **UML Use Case**: Figure 3.2
+- **UML Class Diagram**: Figure 3.3
+- **Activity Diagram**: Figure 3.4 (Stock Alert Workflow)
 
-- Python 3.9+
-- PostgreSQL 12+
-- Redis (optional, for caching/tasks)
+## 🛠️ Installation & Setup
 
-## Installation
-
-### 1. Clone and Setup
-
+### 1. Environment Setup
 ```bash
-cd /Users/masterkelvin/Documents/Chidera/inventory_system
-python -m venv venv
+# Activate your virtual environment
 source venv/bin/activate
-pip install -r requirements.txt
+
+# Install dependencies for both backend and visualization
+pip install -r backend/requirements.txt
+pip install matplotlib  # Required for diagram generation
 ```
 
-### 2. Database Configuration
-
-Create a PostgreSQL database:
-
-```sql
-CREATE DATABASE inventory_system;
-CREATE USER inventory_user WITH PASSWORD 'your_secure_password';
-ALTER ROLE inventory_user SET client_encoding TO 'utf8';
-ALTER ROLE inventory_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE inventory_user SET default_transaction_deferrable TO on;
-GRANT ALL PRIVILEGES ON DATABASE inventory_system TO inventory_user;
-```
-
-### 3. Environment Configuration
-
-Create a `.env` file in the project root:
-
-```
-DEBUG=True
-SECRET_KEY=your-secret-key-here
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=inventory_system
-DB_USER=inventory_user
-DB_PASSWORD=your_secure_password
-DB_HOST=localhost
-DB_PORT=5432
-ALLOWED_HOSTS=localhost,127.0.0.1
-```
-
-### 4. Initialize Database
-
+### 2. Database Initialization
 ```bash
+cd backend
 python manage.py migrate
 python manage.py createsuperuser
-python manage.py loaddata initial_data  # Optional: Load sample data
 ```
 
-### 5. Run Development Server
-
+### 3. Running the Platform
 ```bash
 python manage.py runserver
 ```
 
-Access the application at `http://localhost:8000`
+## ✨ Design & Theme
+The platform now supports a premium dark mode.
+- **Theme Variables**: Defined in `backend/static/css/theme.css` using HSL tokens.
+- **Persistence**: Theme choice is saved in local storage via `backend/static/js/theme.js`.
+- **Aesthetics**: Glassmorphism, smooth animations, and Outfit/Inter typography.
 
-## Project Structure
+## 🔒 Security Features
+- **Allauth Integration**: Secure authentication with Google OAuth support.
+- **Account Middleware**: Enhanced session and account management.
+- **Rate Limiting**: Throttling on API endpoints to prevent abuse.
+- **CSRF & XSS**: Standardized protection across all templates.
 
-```
-inventory_system/
-├── manage.py
-├── requirements.txt
-├── .env
-├── config/                    # Project settings
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
-├── accounts/                  # Authentication & User Management
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   ├── forms.py
-│   ├── decorators.py
-│   └── templates/
-├── inventory/                 # Inventory Management
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   ├── forms.py
-│   ├── serializers.py
-│   └── templates/
-├── operations/                # Stock Operations
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   ├── services.py
-│   └── templates/
-├── reports/                   # Reporting & Analytics
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   ├── services.py
-│   └── templates/
-├── dashboard/                 # Dashboard & Widgets
-│   ├── views.py
-│   ├── urls.py
-│   ├── services.py
-│   └── templates/
-├── static/                    # Static files (CSS, JS, images)
-│   ├── css/
-│   ├── js/
-│   └── img/
-├── media/                     # User-uploaded files
-└── tests/                     # Test suite
-    ├── test_models.py
-    ├── test_views.py
-    ├── test_operations.py
-    └── test_reports.py
-```
+## 📈 Roadmap (Phase 2)
+- [ ] Real-time stock alerts via WebSockets (Django Channels).
+- [ ] Predictive restocking analysis using historical transaction data.
+- [ ] Full headless frontend transition using Next.js/React.
 
-## Usage
-
-### Admin Panel
-Access Django admin at `/admin` with superuser credentials.
-
-### User Roles
-
-1. **Admin**: Full system access, user management, system configuration
-2. **Manager**: Inventory management, operations, reporting
-3. **Staff**: Limited operations, view-only access to reports
-
-### Common Tasks
-
-#### Add Inventory Item
-1. Navigate to Inventory → Add Item
-2. Fill in item details (name, SKU, quantity, category, supplier)
-3. Set low-stock threshold
-4. Save
-
-#### Stock In/Out
-1. Navigate to Operations
-2. Select item and transaction type
-3. Enter quantity
-4. System automatically logs transaction
-
-#### Generate Reports
-1. Navigate to Reports
-2. Select filters (date range, transaction type, category)
-3. View or export as CSV
-
-## API Endpoints
-
-### Items
-- `GET /api/items/` - List all items
-- `POST /api/items/` - Create item
-- `GET /api/items/{id}/` - Get item details
-- `PUT /api/items/{id}/` - Update item
-- `DELETE /api/items/{id}/` - Delete item
-
-### Transactions
-- `GET /api/transactions/` - List transactions
-- `POST /api/transactions/` - Create transaction
-- `GET /api/transactions/{id}/` - Get transaction details
-
-### Reports
-- `GET /api/reports/summary/` - Get summary data
-- `GET /api/reports/transactions/` - Get transaction report
-
-## Testing
-
-Run the test suite:
-
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=.
-
-# Run specific test file
-pytest tests/test_models.py
-
-# Run specific test
-pytest tests/test_models.py::TestItemModel::test_create_item
-```
-
-## Performance Optimization
-
-- Database indexing on frequently queried fields (SKU, name, category)
-- Pagination for large datasets
-- Caching for dashboard data
-- Query optimization with select_related/prefetch_related
-
-## Security Features
-
-- CSRF protection on all forms
-- Input validation and sanitization
-- SQL injection prevention (Django ORM)
-- Password hashing (PBKDF2)
-- Role-based access control
-- Secure session management
-
-## Deployment
-
-### Production Checklist
-- [ ] Set `DEBUG=False` in settings
-- [ ] Configure allowed hosts
-- [ ] Use environment variables for secrets
-- [ ] Set up PostgreSQL with proper backups
-- [ ] Configure static file serving (WhiteNoise/CDN)
-- [ ] Set up SSL/TLS certificates
-- [ ] Configure logging and monitoring
-- [ ] Run security checks: `python manage.py check --deploy`
-
-### Docker Deployment (Optional)
-
-```bash
-docker-compose up -d
-```
-
-## Contributing
-
-1. Follow Django best practices
-2. Write tests for new features
-3. Maintain code style consistency
-4. Document API changes
-
-## License
-
-MIT License
-
-## Support
-
-For issues or questions, contact the development team.
+---
+*Maintained and Curated by Antigravity AI.*
