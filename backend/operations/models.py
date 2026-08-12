@@ -64,3 +64,43 @@ class StockTransaction(models.Model):
             'ADJUSTMENT': '⚙️',
         }
         return icons.get(self.transaction_type, '📋')
+
+
+class Alert(models.Model):
+    """Model for persistent database alerts (e.g. low stock alerts)."""
+    
+    ALERT_TYPE_CHOICES = (
+        ('LOW_STOCK', 'Low Stock Alert'),
+        ('OUT_OF_STOCK', 'Out of Stock Alert'),
+        ('SYSTEM', 'System Alert'),
+    )
+    
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.CASCADE,
+        related_name='alerts',
+        null=True,
+        blank=True
+    )
+    alert_type = models.CharField(
+        max_length=50,
+        choices=ALERT_TYPE_CHOICES,
+        default='LOW_STOCK'
+    )
+    message = models.TextField()
+    quantity_at_alert = models.IntegerField(default=0)
+    threshold_at_alert = models.IntegerField(default=0)
+    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['is_resolved', '-created_at']),
+            models.Index(fields=['item', 'is_resolved']),
+        ]
+    
+    def __str__(self):
+        return f"[{self.alert_type}] {self.message}"
+

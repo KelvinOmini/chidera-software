@@ -10,7 +10,7 @@ from decouple import config, Csv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-smart-inventory-system-2026')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'operations.context_processors.alert_context',
             ],
         },
     },
@@ -321,3 +322,12 @@ CACHES = {
         "LOCATION": "unique-snowflake",
     }
 }
+
+# Celery Beat Periodic Task Schedule (Automated Stock Level Monitoring)
+CELERY_BEAT_SCHEDULE = {
+    'check-low-stock-levels-every-15-mins': {
+        'task': 'operations.tasks.check_low_stock_levels',
+        'schedule': 15 * 60,  # 15 minutes (900 seconds)
+    },
+}
+

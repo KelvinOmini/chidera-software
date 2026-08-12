@@ -18,9 +18,16 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            username_or_email = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
+            
+            # Allow logging in via username or email address
+            user_obj = CustomUser.objects.filter(
+                Q(username__iexact=username_or_email) | Q(email__iexact=username_or_email)
+            ).first()
+            
+            username_to_auth = user_obj.username if user_obj else username_or_email
+            user = authenticate(request, username=username_to_auth, password=password)
             
             if user is not None:
                 login(request, user)
@@ -39,7 +46,7 @@ def login_view(request):
                 next_url = request.GET.get('next', 'dashboard:home')
                 return redirect(next_url)
             else:
-                messages.error(request, 'Invalid username or password.')
+                messages.error(request, 'Invalid username/email or password.')
     else:
         form = LoginForm()
     

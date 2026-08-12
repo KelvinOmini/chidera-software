@@ -2,7 +2,7 @@ from django.db.models import Sum, Count, Q, F
 from django.utils import timezone
 from datetime import timedelta
 from inventory.models import Item, Category, Supplier
-from operations.models import StockTransaction
+from operations.models import StockTransaction, Alert
 
 
 class DashboardService:
@@ -17,6 +17,7 @@ class DashboardService:
             'low_stock_items': DashboardService.get_low_stock_items(limit=5),
             'stock_movement_data': DashboardService.get_stock_movement_chart_data(days=days),
             'category_distribution': DashboardService.get_category_distribution(),
+            'active_alerts': DashboardService.get_active_alerts(limit=5),
         }
     
     @staticmethod
@@ -31,7 +32,16 @@ class DashboardService:
             'categories': Category.objects.count(),
             'suppliers': Supplier.objects.count(),
             'total_transactions': StockTransaction.objects.count(),
+            'alert_count': Alert.objects.filter(is_resolved=False).count(),
         }
+    
+    @staticmethod
+    def get_active_alerts(limit=5):
+        """Get unresolved alert records."""
+        return Alert.objects.filter(
+            is_resolved=False
+        ).select_related('item').order_by('-created_at')[:limit]
+
     
     @staticmethod
     def get_recent_transactions(limit=10):

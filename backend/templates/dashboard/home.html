@@ -168,17 +168,23 @@
     <!-- Low Stock Alerts -->
     <div class="col-lg-4">
         <div class="glass-container h-100 border-danger border-opacity-10">
-            <div class="p-4 border-bottom border-danger border-opacity-10 bg-danger bg-opacity-5">
-                <h5 class="mb-0 text-danger"><i class="bi bi-lightning-charge-fill me-2 rotate-12"></i>Critical Items
-                </h5>
+            <div class="p-4 border-bottom border-danger border-opacity-10 bg-danger bg-opacity-5 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-danger"><i class="bi bi-lightning-charge-fill me-2 rotate-12"></i>Critical Items</h5>
+                {% if summary.alert_count > 0 %}
+                <span class="badge bg-danger rounded-pill">{{ summary.alert_count }} Alert{% if summary.alert_count > 1 %}s{% endif %}</span>
+                {% endif %}
             </div>
             <div class="p-0">
                 {% for item in low_stock_items %}
                 <div
                     class="p-4 border-bottom border-secondary border-opacity-10 d-flex justify-content-between align-items-center transition-all hover-bg-light">
                     <div>
-                        <div class="fw-bold mb-1">{{ item.name }}</div>
-                        <div class="text-muted small">Category: {{ item.category }}</div>
+                        <div class="fw-bold mb-1 d-flex align-items-center gap-2">
+                            {{ item.name }}
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size: 0.65rem;">Alert</span>
+                        </div>
+                        <div class="text-muted small">SKU: {{ item.sku }} | Category: {{ item.category }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">Threshold: {{ item.threshold_level }} units</div>
                     </div>
                     <div class="text-end">
                         <div class="text-danger fw-bold fs-5">{{ item.quantity }}</div>

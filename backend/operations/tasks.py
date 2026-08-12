@@ -12,32 +12,99 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=3)
-def check_low_stock_alerts(self):
+def check_low_stock_levels(self):
     """
-    Check all items for low stock and trigger notifications.
-    Runs periodically via Celery Beat.
+    Continuous stock level monitoring task running periodically via Celery Beat.
+    
+    1. Single optimised database query retrieving all items where quantity <= threshold_level.
+    2. Creates Alert database records for each low-stock item, reflected in dashboard alert badge count.
+    3. Constructs a formatted email notification listing each item with name, SKU, current quantity,
+       and threshold level, and dispatches the email to all administrator email addresses.
     """
     from inventory.models import Item
+    from operations.models import Alert
+    from django.contrib.auth import get_user_model
     
-    low_stock_items = Item.objects.filter(
+    # Single optimised database query
+    low_stock_items = list(Item.objects.filter(
         quantity__lte=F('threshold_level')
-    ).select_related('category', 'supplier')
+    ).select_related('category', 'supplier'))
     
-    if low_stock_items.exists():
-        count = low_stock_items.count()
-        items_list = '\n'.join([
-            f"  - {item.name} (SKU: {item.sku}): {item.quantity} units "
-            f"(threshold: {item.threshold_level})"
-            for item in low_stock_items[:20]
-        ])
-        
-        logger.warning(
-            f"Low stock alert: {count} items below threshold.\n{items_list}"
+    if not low_stock_items:
+        return 'No low stock items'
+    
+    # Create Alert records in the database for each low-stock item
+    alerts_created = 0
+    for item in low_stock_items:
+        alert, created = Alert.objects.get_or_create(
+            item=item,
+            is_resolved=False,
+            defaults={
+                'alert_type': 'LOW_STOCK',
+                'message': f"Low stock warning: {item.name} (SKU: {item.sku}) has {item.quantity} units remaining (Threshold: {item.threshold_level}).",
+                'quantity_at_alert': item.quantity,
+                'threshold_at_alert': item.threshold_level,
+            }
         )
-        
-        return f'{count} low stock items detected'
+        if created:
+            alerts_created += 1
+        else:
+            alert.quantity_at_alert = item.quantity
+            alert.threshold_at_alert = item.threshold_level
+            alert.message = f"Low stock warning: {item.name} (SKU: {item.sku}) has {item.quantity} units remaining (Threshold: {item.threshold_level})."
+            alert.save(update_fields=['quantity_at_alert', 'threshold_at_alert', 'message', 'updated_at'])
+
+    # Construct formatted email notification listing each item with name, SKU, quantity, threshold level
+    subject = f"Automated Alert: {len(low_stock_items)} Low Stock Item(s) Detected"
     
-    return 'No low stock items'
+    items_list_lines = [
+        f"• Name: {item.name} | SKU: {item.sku} | Current Quantity: {item.quantity} | Threshold Level: {item.threshold_level}"
+        for item in low_stock_items
+    ]
+    
+    email_body = (
+        f"Automated Stock Level Monitoring System\n"
+        f"----------------------------------------\n"
+        f"The following {len(low_stock_items)} item(s) are currently at or below their low stock threshold level:\n\n"
+        + "\n".join(items_list_lines) +
+        f"\n\nPlease log in to the inventory dashboard to review and manage restock requests."
+    )
+    
+    # Dispatch email to all configured administrator email addresses
+    User = get_user_model()
+    admin_emails = list(
+        User.objects.filter(role='admin', is_active=True)
+        .exclude(email='')
+        .values_list('email', flat=True)
+    )
+    
+    if hasattr(settings, 'ADMIN_EMAIL') and settings.ADMIN_EMAIL and settings.ADMIN_EMAIL not in admin_emails:
+        admin_emails.append(settings.ADMIN_EMAIL)
+    
+    if not admin_emails:
+        admin_emails = [getattr(settings, 'ADMIN_EMAIL', 'admin@example.com')]
+        
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@inventory.system')
+    
+    try:
+        send_mail(
+            subject=subject,
+            message=email_body,
+            from_email=from_email,
+            recipient_list=admin_emails,
+            fail_silently=True,
+        )
+        logger.info(f"Low stock notification email sent to {len(admin_emails)} admins for {len(low_stock_items)} items.")
+    except Exception as exc:
+        logger.error(f"Error sending automated low stock alert emails: {exc}")
+        
+    return f"{len(low_stock_items)} low stock items processed ({alerts_created} new alerts created)"
+
+
+@shared_task(bind=True, max_retries=3)
+def check_low_stock_alerts(self):
+    """Wrapper function for check_low_stock_levels for backward compatibility."""
+    return check_low_stock_levels()
 
 
 @shared_task(bind=True, max_retries=3)
